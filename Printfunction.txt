@@ -1,0 +1,30 @@
+printTar() {
+    let formValues = this.userFormGroup.value;
+    if(formValues.fromDate!=null && formValues.toDate!=null)
+    {
+      let start_Date = new Date(format(formValues.fromDate, "MM/DD/YYYY"));
+      let end_Date = new Date(format(formValues.toDate, "MM/DD/YYYY"));
+      let timeDifference = start_Date.getTime() - end_Date.getTime();
+      let dayMilliSeconds = 1000 * 60 * 60 * 24;
+      let totalDays = Math.abs(timeDifference / dayMilliSeconds); // it returns negative value if start date < end date
+      totalDays = Math.floor(totalDays); // to get complete days
+      if(totalDays<=92)
+      {
+        let htmlc = new PrintService();
+        const WindowPrt = window.open('', '', 'left=0,top=0,width=900,height=900,toolbar=0,scrollbars=0,status=0');
+        WindowPrt.document.write(htmlc.PreparePrintContent(this.ProgressNotesList, this.clientInfo));
+        WindowPrt.document.close();
+        WindowPrt.focus();
+        WindowPrt.print();
+        WindowPrt.close();
+      }
+      else{
+        this.notifier.notify('warning', "Please limit your print range to 3 months for best performance. Exceeding this may cause slow response times.");
+      }
+    }
+    else
+    {
+      this.notifier.notify('warning', "Please limit your print range to 3 months for best performance. Exceeding this may cause slow response times.");
+    }
+    
+  }

@@ -1,0 +1,125 @@
+import { format } from "date-fns";
+export class PrintService {
+    PreparePrintContent(progressNotesList: any, clientInfo: any) {
+        let orgDetails = JSON.parse(localStorage.getItem('business_token_object'));
+        let orgAddress = 'Address: ';
+        let orgName = '';
+        if (orgDetails && orgDetails.organization) {
+            orgAddress += orgDetails.organization.address1 + ', ' + orgDetails.organization.city + `, 
+                                    Phone: `+ orgDetails.organization.phone + `, Fax: ` + orgDetails.organization.fax + `.`;
+            orgName = orgDetails.organization.organizationName;
+        }
+
+        let htmlContent = `<head> <title>`+this.fstring(clientInfo.patientBasicHeaderInfo.name)+` Tar Report</title>
+                                    <style type="text/css" media="print">
+                                        @page{ size: auto; /* auto is the initial value */ 
+                                        margin: 2mm 1mm 0mm 0mm; /* this affects the margin in the printer settings */ }
+                                        thead{display: table-header-group;}tfoot{display: table-footer-group;}
+                                        </style>
+                                        <style type="text/css" media="screen"> 
+                                        thead {display: block; }
+                                        tfoot {display: block;}                                         
+                                        </style></head><body>`;
+        htmlContent += `<div style='text-align: center;'>
+                            <span style='font-weight: bold;'>`+ orgName + `</span><br>
+                            <span style='font-size: x-small;'>`+ orgAddress + `</span>
+                        </div>
+                        <table style='width: 100%;'>
+                        <thead>
+                        <tr>
+                           <td colspan="4">
+                             <div>
+                                   <span style='font-weight: bold;'>Name :</span> `+ this.fstring(clientInfo.patientBasicHeaderInfo.name) + `
+                                   <span style='font-weight: bold;'>Age:</span> `+ this.fstring(clientInfo.patientBasicHeaderInfo.age) + `                         
+                                   <span style='font-weight: bold;'>PHC Number:</span> `+ this.fstring(clientInfo.patientBasicHeaderInfo.phcNo) + `
+                                   <span style='font-weight: bold;'>Room:</span> `+ this.roomCheck(clientInfo.patientBasicHeaderInfo.room) + `
+                                   <span style='font-weight: bold;'>Print Date:</span> `+ new Date().toLocaleDateString() + `
+                              </div>
+                             </tr>
+                            <tr> <td  colspan="4" ><hr></td></tr>                                  
+                        </thead>`;
+        htmlContent += '<tbody>';
+        progressNotesList.forEach(item => {
+            htmlContent += `      
+        <tr style='background: #e5e9ef;'><td colspan="4" ></td></tr>                 
+        <tr style='background: #e5e9ef;'>
+            <td>
+            <td colspan="3" style='font-weight: bold;'>
+            `+ this.fdate(item.dateOfTAR) + ' ' + this.ftime(item.timeOfTAR) + `
+            - `+ this.fstring(item.staffName) + ' ' + this.fstring(item.degreeName) + `
+        </tr> 
+        <tr style='background: #e5e9ef;'><td colspan="4" ></td></tr>     
+        <tr>
+            <td>
+            <td colspan="2" style='font-weight: bold;'>Record Type :
+            <td>`+ this.fstring(item.recordType) + `</tr>
+        <tr>
+             <td>
+            <td colspan="2" style='font-weight: bold;'>Intervention :
+            <td>`+ this.fstring(item.interventions) + `</tr>
+        <tr>
+            <td>
+            <td colspan="2" style='font-weight: bold;'>Focus :
+            <td>`+ this.fstring(item.focus) + `</tr>
+        <tr>
+            <td>
+            <td colspan="2" style='font-weight: bold;'>Data :
+            <td>`+ this.fstring(item.details) + `</tr>
+        <tr>
+            <td>
+            <td colspan="2" style='font-weight: bold;'>Action :
+            <td>`+ this.fstring(item.outcome) + `</tr>
+        <tr>
+            <td>
+            <td colspan="2" style='font-weight: bold;'>Response :
+            <td>`+ this.fstring(item.response) + `</tr>
+        <tr>
+            <td>
+            <td colspan="2" style='font-weight: bold;'>Plan :
+            <td>`+ this.fstring(item.plan) + `</tr>
+        <tr>
+            <td>
+            <td colspan="2" style='font-weight: bold;'>Provider :
+            <td>`+ this.fstring(item.staffName) + `</tr>
+        <tr>
+            <td>
+            <td colspan="2" style='font-weight: bold;'>Role :
+            <td>`+ this.fstring(item.degreeName) + `</tr>
+        <tr>
+            <td>
+            <td colspan="2" style='font-weight: bold;'>Signature:
+            <td> <img src="`+ item.signature + `"style="width: 250px" /></tr>
+        `;
+        });
+        htmlContent += '</tbody></table></body>';
+        // htmlContent +=`
+        // <tfoot>
+        // <tr>
+        //     <td colspan="4"><hr>
+        // </tr>
+        // <tr>
+        //     <td> 
+        //     <td colspan="2"> AccessEMR
+        // </tr>
+        // </tfoot>
+        // </table></body>`;
+        return htmlContent;
+    }
+    fstring(str: string) {
+        return str ? str : '';
+    }
+    fdate(str: Date) {
+        return str ? format(str, 'MM/DD/YYYY') : '';
+    }
+    ftime(str: string) {
+        return str ? format(str, 'h:mm A') : '';
+    }
+    roomCheck(str: string) {
+        if (str == null || str == "") {
+            return "Waiting Room";
+        }
+        else {
+            return str;
+        }
+    }
+}
